@@ -1,10 +1,11 @@
-interface PanelCardProps {
+import React, { type PropsWithChildren } from 'react';
+
+type PanelCardProps = PropsWithChildren<{
   title: string;
   description: string;
-  children: React.ReactNode;
-}
+}>;
 
-export function PanelCard({ title, description, children }: PanelCardProps) {
+export const PanelCard: React.FC<PanelCardProps> = ({ title, description, children }) => {
   return (
     <div className="bg-white border border-[var(--color-muted)] rounded p-4">
       <div className="mb-3">
@@ -21,4 +22,4 @@ export function PanelCard({ title, description, children }: PanelCardProps) {
       </div>
     </div>
   );
-}
+};

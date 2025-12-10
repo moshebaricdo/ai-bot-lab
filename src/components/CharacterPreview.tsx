@@ -1,4 +1,8 @@
+import React from 'react';
 import { CharacterConfig } from '../App';
+import { viewBox } from '../character/types';
+import { getBodyComponent, getFaceComponent, poseFromOrientation, powerFromState, availableBodyKeys, availableFaceKeys } from '../character/manifest';
+import { bodyTransformByPosePower, faceRectByPose, computeFitTransformForRect, faceScaleByPose } from '../character/layout';
 
 interface CharacterPreviewProps {
   config: CharacterConfig;
@@ -14,6 +18,25 @@ export function CharacterPreview({ config }: CharacterPreviewProps) {
     accessories,
     glowEnabled
   } = config;
+
+  // New: compute pose/power and asset components
+  const pose = poseFromOrientation(orientation as any);
+  const power = powerFromState({ lidOpen, scannerActive, glowEnabled });
+  const BodyComp = getBodyComponent(pose, power);
+  const FaceComp = getFaceComponent(pose, expression as any);
+  if (!BodyComp || !FaceComp) {
+    // Lightweight debug to verify what assets are available
+    // eslint-disable-next-line no-console
+    console.debug('[CharacterPreview] assets', {
+      pose,
+      power,
+      expression,
+      hasBody: !!BodyComp,
+      hasFace: !!FaceComp,
+      availableBodyKeys,
+      availableFaceKeys
+    });
+  }
 
   // Calculate rotation based on orientation
   const getRotationY = () => {
@@ -129,6 +152,53 @@ export function CharacterPreview({ config }: CharacterPreviewProps) {
   };
 
   const exp = getExpression();
+
+  // If we have either body or face assets, render them with asset wrappers and transforms.
+  if (BodyComp || FaceComp) {
+    const faceRect = faceRectByPose[pose];
+    const faceScale = faceScaleByPose[pose] ?? 1;
+    const faceTf = computeFitTransformForRect(faceRect, faceScale);
+    const bodyTf = bodyTransformByPosePower[pose][power];
+    // Center-preserving scale for body so increasing scale doesn't drift to top-left
+    const centeredBodyTx = bodyTf.tx + (viewBox.width - viewBox.width * bodyTf.scale) / 2;
+    const centeredBodyTy = bodyTf.ty + (viewBox.height - viewBox.height * bodyTf.scale) / 2;
+    const glowColorValue = glowEnabled ? accentColor : null;
+    // Expand the outer canvas (viewBox) to add whitespace padding and avoid glow clipping.
+    // Keep aspect ratio identical by padding proportionally on both axes.
+    const padFactor = power === 'on' ? 0.1 : 0.1; // 18% of base dims when on; 8% when off
+    const outerWidth = viewBox.width * (1 + 2 * padFactor);
+    const outerHeight = viewBox.height * (1 + 2 * padFactor);
+    const marginX = viewBox.width * padFactor;
+    const marginY = viewBox.height * padFactor;
+    return (
+      <div className="relative w-full h-full">
+        <svg
+          viewBox={`0 0 ${outerWidth} ${outerHeight}`}
+          className="w-full h-full"
+          style={{ 
+            filter: glowColorValue ? `drop-shadow(0 0 20px ${glowColorValue})` : undefined
+          }}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <g transform={`translate(${marginX}, ${marginY})`}>
+          {/* Body layer */}
+          {BodyComp && (
+            <g transform={`translate(${centeredBodyTx}, ${centeredBodyTy}) scale(${bodyTf.scale})`}>
+              <BodyComp width={viewBox.width} height={viewBox.height} />
+            </g>
+          )}
+          {/* Face layer (optional small nudge per pose) */}
+          {FaceComp && (
+            <g transform={`translate(${faceTf.tx}, ${faceTf.ty}) scale(${faceTf.scale})`}>
+              <FaceComp width={viewBox.width} height={viewBox.height} />
+            </g>
+          )}
+          </g>
+          {/* TODO: accessories can become asset-based later; keep existing simple ones for now */}
+        </svg>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full h-full">

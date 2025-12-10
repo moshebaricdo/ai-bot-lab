@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 
@@ -87,17 +87,17 @@ export function OrientationSlider({ value, onChange }: OrientationSliderProps) {
           <div className="flex-1 flex items-center relative h-[24px]">
             <div 
               ref={sliderRef}
-              className="w-full h-[4px] bg-[#c6ced6] rounded-[4px] relative cursor-pointer"
+              className="w-full h-[4px] bg-[#c6ced6] rounded-[4px] relative cursor-pointer overflow-visible"
               onMouseDown={handleMouseDown}
             >
               {/* Filled portion */}
               <div 
-                className="absolute top-0 h-full bg-[var(--color-accent)]"
+                className="absolute top-0 h-full bg-[var(--color-accent)] z-0"
                 style={{ left: `${fillStart}%`, width: `${fillWidth}%` }}
               />
               
               {/* Step indicators - All positions including edges */}
-              <div className="absolute flex items-center justify-between left-0 right-0 top-1/2 -translate-y-1/2">
+              <div className="absolute flex items-center justify-between left-0 right-0 top-1/2 -translate-y-1/2 z-10 pointer-events-none">
                 {STEPS.map((_, index) => (
                   <div
                     key={index}
@@ -111,30 +111,14 @@ export function OrientationSlider({ value, onChange }: OrientationSliderProps) {
 
               {/* Knob */}
               <div
-                className="absolute top-1/2 size-[14px] cursor-grab active:cursor-grabbing"
-                style={{ 
+                className="group absolute w-4 h-4 cursor-grab active:cursor-grabbing z-[999] pointer-events-auto"
+                style={{
                   left: `${progress * 100}%`,
-                  transform: 'translate(-50%, -50%)'
+                  top: '-6px',
+                  transform: 'translateX(-50%)'
                 }}
               >
-                <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 20 20">
-                  <defs>
-                    <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="20" id="filter0_d_knob" width="20" x="0" y="0">
-                      <feFlood floodOpacity="0" result="BackgroundImageFix" />
-                      <feColorMatrix in="SourceAlpha" result="hardAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
-                      <feOffset dy="1" />
-                      <feGaussianBlur stdDeviation="1.5" />
-                      <feComposite in2="hardAlpha" operator="out" />
-                      <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.2 0" />
-                      <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow" />
-                      <feBlend in="SourceGraphic" in2="effect1_dropShadow" mode="normal" result="shape" />
-                    </filter>
-                  </defs>
-                  <g filter="url(#filter0_d_knob)">
-                    <circle cx="10" cy="9" fill="white" r="7" />
-                    <circle cx="10" cy="9" r="6" stroke="#292F36" strokeWidth="2" />
-                  </g>
-                </svg>
+                <div className="w-full h-full rounded-full border-2 border-[#292F36] bg-[#FFFFFF] shadow-sm transition-colors group-hover:bg-[#ECEFF3]" />
               </div>
             </div>
           </div>

@@ -1,0 +1,25 @@
+<svg width="96" height="109" viewBox="0 0 96 109" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_3362_1350)">
+<path d="M95.4434 54.5C95.4434 24.4005 73.4108 0 46.2322 0C19.0537 0 -34.1669 0 -61.3455 0C-88.5241 0 -110.557 24.4005 -110.557 54.5C-110.557 84.5995 -88.5241 109 -61.3455 109C-34.167 109 19.0537 109 46.2322 109C73.4108 109 95.4434 84.5995 95.4434 54.5Z" fill="#143441"/>
+<path d="M95.4434 54.5C95.4434 24.4005 73.4108 0 46.2322 0C19.0537 0 -34.1669 0 -61.3455 0C-88.5241 0 -110.557 24.4005 -110.557 54.5C-110.557 84.5995 -88.5241 109 -61.3455 109C-34.167 109 19.0537 109 46.2322 109C73.4108 109 95.4434 84.5995 95.4434 54.5Z" fill="#0C1F26"/>
+<g filter="url(#filter0_d_3362_1350)">
+<rect width="37" height="11" rx="5.5" transform="matrix(-0.939693 -0.34202 -0.34202 0.939693 65.416 60.6548)" fill="#3CFFF8"/>
+<rect x="64.4443" y="45.9695" width="37" height="11" rx="5.5" transform="rotate(155 64.4443 45.9695)" fill="#3CFFF8"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M0.426183 92.0035C19.57 92.0187 27.5057 64.0899 14.1167 64.0664C9.60547 64.0585 5.87962 65.195 0.425185 65.1993C-5.05236 65.2037 -8.83572 64.0733 -13.3267 64.0654C-26.5484 64.0423 -18.7177 91.9883 0.426183 92.0035Z" fill="#3CFFF8"/>
+</g>
+</g>
+<defs>
+<filter id="filter0_d_3362_1350" x="-42.276" y="15.4264" width="128.526" height="98.9584" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset/>
+<feGaussianBlur stdDeviation="11.1907"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.235294 0 0 0 0 1 0 0 0 0 0.972549 0 0 0 0.6 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_3362_1350"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_3362_1350" result="shape"/>
+</filter>
+<clipPath id="clip0_3362_1350">
+<rect width="96" height="109" fill="white" transform="matrix(-1 0 0 1 96 0)"/>
+</clipPath>
+</defs>
+</svg>
