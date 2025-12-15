@@ -5,9 +5,9 @@
   import path from 'path';
 
   export default defineConfig({
-    // Set the correct base path for GitHub Pages project site
-    // Replace with '/<repo-name>/' if the repository name changes
-    base: '/Aibotcharactergenerator/',
+  // Use a relative base so built assets load correctly from /docs on GitHub Pages
+  // This avoids issues if the repo name or Pages source changes.
+  base: './',
     plugins: [
       // Enable importing SVGs as React components via `?react`
       svgr(),
