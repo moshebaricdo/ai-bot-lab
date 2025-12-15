@@ -5,6 +5,9 @@
   import path from 'path';
 
   export default defineConfig({
+    // Set the correct base path for GitHub Pages project site
+    // Replace with '/<repo-name>/' if the repository name changes
+    base: '/Aibotcharactergenerator/',
     plugins: [
       // Enable importing SVGs as React components via `?react`
       svgr(),
@@ -56,7 +59,8 @@
     },
     build: {
       target: 'esnext',
-      outDir: 'build',
+      // Output to 'docs' so GitHub Pages can serve from /docs on main
+      outDir: 'docs',
     },
     server: {
       port: 3000,
