@@ -12,6 +12,7 @@ const STEPS = ['far-left', 'left', 'center', 'right', 'far-right'] as const;
 export function OrientationSlider({ value, onChange }: OrientationSliderProps) {
   const [isDragging, setIsDragging] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
+  const [isKnobHover, setIsKnobHover] = useState(false);
   
   const currentIndex = STEPS.indexOf(value);
   const progress = currentIndex / (STEPS.length - 1);
@@ -60,11 +61,14 @@ export function OrientationSlider({ value, onChange }: OrientationSliderProps) {
     };
 
     if (isDragging) {
+      // Force grabbing cursor globally during drag to avoid flicker when cursor outruns the knob
+      document.body.style.cursor = 'grabbing';
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
     }
 
     return () => {
+      document.body.style.cursor = '';
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
@@ -87,7 +91,7 @@ export function OrientationSlider({ value, onChange }: OrientationSliderProps) {
           <div className="flex-1 flex items-center relative h-[24px]">
             <div 
               ref={sliderRef}
-              className="w-full h-[4px] bg-[#c6ced6] rounded-[4px] relative cursor-pointer overflow-visible"
+              className="w-full h-[4px] bg-[#c6ced6] rounded-[4px] relative overflow-visible"
               onMouseDown={handleMouseDown}
             >
               {/* Filled portion */}
@@ -111,14 +115,34 @@ export function OrientationSlider({ value, onChange }: OrientationSliderProps) {
 
               {/* Knob */}
               <div
-                className="group absolute w-4 h-4 cursor-grab active:cursor-grabbing z-[999] pointer-events-auto"
+                className="group absolute pointer-events-auto"
                 style={{
                   left: `${progress * 100}%`,
                   top: '-6px',
-                  transform: 'translateX(-50%)'
+                  transform: 'translateX(-50%)',
+                  width: 16,
+                  height: 16,
+                  zIndex: 11,
+                  cursor: isDragging ? 'grabbing' : 'grab'
                 }}
+                onMouseEnter={() => setIsKnobHover(true)}
+                onMouseLeave={() => setIsKnobHover(false)}
+                onMouseDown={() => setIsDragging(true)}
               >
-                <div className="w-full h-full rounded-full border-2 border-[#292F36] bg-[#FFFFFF] shadow-sm transition-colors group-hover:bg-[#ECEFF3]" />
+                <div
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: 9999,
+                    border: '2px solid #292F36',
+                    backgroundColor: isDragging ? '#DFE3E9' : (isKnobHover ? '#ECEFF3' : '#FFFFFF'),
+                    boxShadow: '0 1px 1px rgba(0,0,0,0.05)',
+                    transition: 'background-color 120ms ease',
+                    cursor: isDragging ? 'grabbing' : 'grab'
+                  }}
+                  onMouseEnter={() => setIsKnobHover(true)}
+                  onMouseLeave={() => setIsKnobHover(false)}
+                />
               </div>
             </div>
           </div>

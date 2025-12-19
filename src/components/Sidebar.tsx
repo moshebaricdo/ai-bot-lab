@@ -15,13 +15,11 @@ import {
   faFaceSurprise,
   faFaceDizzy,
   faCommentDots,
-  faPaintRoller, 
   faGlasses,
   faHeadphones,
   faBed,
   faStar,
   faQuestion,
-  faFillDrip,
   faHatWizard
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -31,10 +29,11 @@ interface SidebarProps {
   onReset: () => void;
 }
 
-type TabType = 'body' | 'color' | 'accessories';
+type TabType = 'body' | 'accessories';
 
 export function Sidebar({ config, setConfig, onReset }: SidebarProps) {
   const [activeTab, setActiveTab] = useState<TabType>('body');
+  const [showAccessoriesTooltip, setShowAccessoriesTooltip] = useState(false);
 
   const updateConfig = (partial: Partial<CharacterConfig>) => {
     setConfig({ ...config, ...partial });
@@ -61,9 +60,8 @@ export function Sidebar({ config, setConfig, onReset }: SidebarProps) {
     updateConfig({ accessories: { ...config.accessories, misc: newMisc } });
   };
 
-  const presetColors = [
-    '#3CFFF8', '#9657C7', '#ED6060', '#FFB42E', '#3EA33E'
-  ];
+  // Limit UI to three bot colors as requested
+  const limitedColors = ['#3CFFF8', '#ED6060', '#3EA33E']; // aqua, red, green
 
   return (
     <div className="w-[350px] bg-white border-r border-[var(--color-muted)] flex flex-col shrink-0">
@@ -97,35 +95,49 @@ export function Sidebar({ config, setConfig, onReset }: SidebarProps) {
             <span className="text-sm" style={{ fontFamily: 'var(--font-body)', fontWeight: 'var(--font-weight-semibold)' }}>Body</span>
           </button>
           
-          <button
-            onClick={() => setActiveTab('color')}
-            className={`flex items-center gap-1.5 pb-2.5 pt-2 relative group ${
-              activeTab === 'color' ? 'text-[var(--color-foreground)]' : 'text-[#576575] hover:text-[#0093a4]'
-            }`}
+          <div
+            className="relative"
+            onMouseEnter={() => setShowAccessoriesTooltip(true)}
+            onMouseLeave={() => setShowAccessoriesTooltip(false)}
           >
-            {activeTab === 'color' ? (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--color-accent)]" />
-            ) : (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0093a4] opacity-0 group-hover:opacity-100 transition-opacity" />
+            <button
+              disabled
+              className="flex items-center gap-1.5 pb-2.5 pt-2 relative cursor-not-allowed opacity-30"
+              style={{ color: 'rgba(41,47,54,0.3)' }}
+              aria-disabled="true"
+            >
+              <span className="text-sm"><FontAwesomeIcon icon={faGlasses} size="sm" /></span>
+              <span className="text-sm" style={{ fontFamily: 'var(--font-body)', fontWeight: 'var(--font-weight-semibold)' }}>Accessories</span>
+            </button>
+            {showAccessoriesTooltip && (
+              <div
+                aria-hidden="true"
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  marginTop: -1,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  zIndex: 1000,
+                  pointerEvents: 'none'
+                }}
+              >
+                <div
+                  style={{
+                    backgroundColor: '#292F36',
+                    color: '#FFFFFF',
+                    padding: '4px 8px',
+                    borderRadius: '0px 0px 4px 4px',
+                    fontSize: 12,
+                    fontFamily: 'var(--font-body)',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Coming soon
+                </div>
+              </div>
             )}
-            <span className="text-sm"><FontAwesomeIcon icon={faPaintRoller} size="sm" /></span>
-            <span className="text-sm" style={{ fontFamily: 'var(--font-body)', fontWeight: 'var(--font-weight-semibold)' }}>Color</span>
-          </button>
-          
-          <button
-            onClick={() => setActiveTab('accessories')}
-            className={`flex items-center gap-1.5 pb-2.5 pt-2 relative group ${
-              activeTab === 'accessories' ? 'text-[var(--color-foreground)]' : 'text-[#576575] hover:text-[#0093a4]'
-            }`}
-          >
-            {activeTab === 'accessories' ? (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--color-accent)]" />
-            ) : (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0093a4] opacity-0 group-hover:opacity-100 transition-opacity" />
-            )}
-            <span className="text-sm"><FontAwesomeIcon icon={faGlasses} size="sm" /></span>
-            <span className="text-sm" style={{ fontFamily: 'var(--font-body)', fontWeight: 'var(--font-weight-semibold)' }}>Accessories</span>
-          </button>
+          </div>
         </div>
       </div>
 
@@ -133,6 +145,48 @@ export function Sidebar({ config, setConfig, onReset }: SidebarProps) {
       <div className="flex-1 overflow-y-auto p-2.5 bg-[#f0f2f5]">
         {activeTab === 'body' && (
           <div className="flex flex-col gap-2">
+            {/* Color Selection (moved from Color tab) */}
+            <PanelCard
+              title="Color"
+              description="Choose a color for expression and body. Aqua is default, red/green should correspond to sentiment."
+              children={(
+                <>
+                  <div className="content-stretch flex gap-2 items-start relative shrink-0 w-full mb-3">
+                    {limitedColors.map(color => (
+                      <button
+                        key={color}
+                        onClick={() => updateConfig({ accentColor: color })}
+                        className={`flex items-center justify-center relative rounded-[var(--radius)] shrink-0 size-8 hover:opacity-80 transition-all ${
+                          config.accentColor === color ? 'outline outline-2 outline-[var(--color-accent)] outline-offset-2' : ''
+                        }`}
+                        style={{ backgroundColor: color }}
+                      >
+                        <div aria-hidden="true" className="absolute border border-[rgba(41,47,54,0.2)] border-solid inset-0 pointer-events-none rounded-[var(--radius)]" />
+                      </button>
+                    ))}
+                  </div>
+                  <div
+                    className="w-full"
+                    style={{
+                      height: 1,
+                      backgroundColor: '#e6eaef',
+                      marginTop: 18,
+                      marginBottom: 12,
+                    }}
+                  />
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-[var(--color-foreground)]" style={{ fontFamily: 'var(--font-body)' }}>
+                      AI Bot Lights On/Off
+                    </p>
+                    <Toggle 
+                      checked={config.scannerActive} 
+                      onChange={(checked) => updateConfig({ scannerActive: checked })} 
+                    />
+                  </div>
+                </>
+              )}
+            />
+
             {/* Expression Section */}
             <PanelCard 
               title="Expression"
@@ -188,89 +242,7 @@ export function Sidebar({ config, setConfig, onReset }: SidebarProps) {
               )}
             />
 
-            {/* Additional Details Section */}
-            <PanelCard
-              title="Additional Details"
-              description="Use these when communicating that AI bot is interacting with other on-screen elements."
-              children={(
-                <div className="flex flex-col gap-2.5">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-[var(--color-foreground)]" style={{ fontFamily: 'var(--font-body)' }}>
-                      AI Bot Lights On/Off
-                    </p>
-                    <Toggle 
-                      checked={config.scannerActive} 
-                      onChange={(checked) => updateConfig({ scannerActive: checked })} 
-                    />
-                  </div>
-                  {/* Temporarily disabled per current design direction
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-[var(--color-foreground)]" style={{ fontFamily: 'var(--font-body)' }}>
-                      Top lid open
-                    </p>
-                    <Toggle 
-                      checked={config.lidOpen} 
-                      onChange={(checked) => updateConfig({ lidOpen: checked })} 
-                    />
-                  </div>
-                  */}
-                </div>
-              )}
-            />
-          </div>
-        )}
-
-        {activeTab === 'color' && (
-          <div className="flex flex-col gap-2">
-            {/* Accent Color Card */}
-            <PanelCard
-              title="Accent Color"
-              description="If using a custom color, ensure it has sufficient contrast with the bot's body."
-              children={(
-                <>
-                  {/* Color Preset Buttons */}
-                  <div className="content-stretch flex gap-2 items-start relative shrink-0 w-full mb-3">
-                    {presetColors.map(color => (
-                      <button
-                        key={color}
-                        onClick={() => updateConfig({ accentColor: color })}
-                        className={`flex items-center justify-center relative rounded-[var(--radius)] shrink-0 size-8 hover:opacity-80 transition-all ${
-                          config.accentColor === color ? 'outline outline-2 outline-[var(--color-accent)] outline-offset-2' : ''
-                        }`}
-                        style={{ backgroundColor: color }}
-                      >
-                        <div aria-hidden="true" className="absolute border border-[rgba(41,47,54,0.2)] border-solid inset-0 pointer-events-none rounded-[var(--radius)]" />
-                      </button>
-                    ))}
-                    {/* Custom Color Picker */}
-                    <label className={`flex items-center justify-center relative rounded-[var(--radius)] shrink-0 size-8 bg-white hover:opacity-80 transition-all cursor-pointer ${
-                      !presetColors.includes(config.accentColor) ? 'outline outline-2 outline-[var(--color-accent)] outline-offset-2' : ''
-                    }`}>
-                      <input
-                        type="color"
-                        value={config.accentColor}
-                        onChange={(e) => updateConfig({ accentColor: e.target.value })}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      />
-                      <FontAwesomeIcon icon={faFillDrip} className="text-[var(--color-foreground)] relative z-10" />
-                      <div aria-hidden="true" className="absolute border border-[rgba(41,47,54,0.2)] border-solid inset-0 pointer-events-none rounded-[var(--radius)]" />
-                    </label>
-                  </div>
-
-                  {/* Glow Toggle */}
-                  <div className="content-stretch flex items-start justify-between relative shrink-0 w-full">
-                    <div className="content-stretch flex flex-col items-start justify-center relative shrink-0">
-                      <p className="leading-[21.56px] not-italic relative shrink-0 text-[var(--color-foreground)] text-sm text-nowrap whitespace-pre" style={{ fontFamily: 'var(--font-body)' }}>Full-body glow</p>
-                      <p className="text-xs text-[#576575] mt-0.5" style={{ fontFamily: 'var(--font-body)' }}>Set to 80% opacity of accent color.</p>
-                    </div>
-                    <Toggle 
-                      checked={config.glowEnabled} 
-                      onChange={(checked) => updateConfig({ glowEnabled: checked })} 
-                    />
-                  </div>
-                </>
-              )}
-            />
+            {/* Lights toggle moved under Color card */}
           </div>
         )}
 

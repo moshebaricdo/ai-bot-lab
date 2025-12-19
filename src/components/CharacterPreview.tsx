@@ -1,7 +1,7 @@
 import React from 'react';
 import { CharacterConfig } from '../App';
 import { viewBox } from '../character/types';
-import { getBodyComponent, getFaceComponent, poseFromOrientation, powerFromState, availableBodyKeys, availableFaceKeys } from '../character/manifest';
+import { getBodyComponent, getFaceComponent, poseFromOrientation, powerFromState, availableBodyKeys, availableFaceKeys, availableBodyColors, availableFaceColors } from '../character/manifest';
 import { bodyTransformByPosePower, faceRectByPose, computeFitTransformForRect, faceScaleByPose } from '../character/layout';
 
 interface CharacterPreviewProps {
@@ -19,11 +19,62 @@ export function CharacterPreview({ config }: CharacterPreviewProps) {
     glowEnabled
   } = config;
 
+  // Determine closest asset color from accentColor
+  const presetHexToName: Record<string, string> = {
+    '#3CFFF8': 'aqua',
+    '#9657C7': 'purple',
+    '#ED6060': 'red',
+    '#FFB42E': 'orange',
+    '#3EA33E': 'green',
+  };
+  const hexToRgb = (hex: string) => {
+    const h = hex.replace('#', '');
+    const r = parseInt(h.slice(0, 2), 16);
+    const g = parseInt(h.slice(2, 4), 16);
+    const b = parseInt(h.slice(4, 6), 16);
+    return { r, g, b };
+  };
+  const colorDistance = (h1: string, h2: string) => {
+    const a = hexToRgb(h1);
+    const b = hexToRgb(h2);
+    const dr = a.r - b.r;
+    const dg = a.g - b.g;
+    const db = a.b - b.b;
+    return dr * dr + dg * dg + db * db;
+  };
+  const chooseAssetColorName = () => {
+    // Exact preset match first
+    if (presetHexToName[accentColor]) {
+      return presetHexToName[accentColor];
+    }
+    // Nearest preset
+    const presetHexes = Object.keys(presetHexToName);
+    let bestHex = presetHexes[0];
+    let bestDist = Number.POSITIVE_INFINITY;
+    for (const h of presetHexes) {
+      const d = colorDistance(accentColor, h);
+      if (d < bestDist) {
+        bestDist = d;
+        bestHex = h;
+      }
+    }
+    const candidate = presetHexToName[bestHex];
+    // Ensure candidate exists in available assets; prefer a color present for both body and face
+    const bodyHas = availableBodyColors.includes(candidate);
+    const faceHas = availableFaceColors.includes(candidate);
+    if (bodyHas && faceHas) return candidate;
+    if (bodyHas) return candidate;
+    if (faceHas) return candidate;
+    // Fallback to first available body color, else first available face color, else 'aqua'
+    return availableBodyColors[0] ?? availableFaceColors[0] ?? 'aqua';
+  };
+  const assetColorName = chooseAssetColorName();
+
   // New: compute pose/power and asset components
   const pose = poseFromOrientation(orientation as any);
   const power = powerFromState({ lidOpen, scannerActive, glowEnabled });
-  const BodyComp = getBodyComponent(pose, power);
-  const FaceComp = getFaceComponent(pose, expression as any);
+  const BodyComp = getBodyComponent(pose, power, assetColorName);
+  const FaceComp = getFaceComponent(pose, expression as any, assetColorName);
   if (!BodyComp || !FaceComp) {
     // Lightweight debug to verify what assets are available
     // eslint-disable-next-line no-console
@@ -31,6 +82,7 @@ export function CharacterPreview({ config }: CharacterPreviewProps) {
       pose,
       power,
       expression,
+      assetColorName,
       hasBody: !!BodyComp,
       hasFace: !!FaceComp,
       availableBodyKeys,
